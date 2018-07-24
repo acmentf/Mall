@@ -6,7 +6,7 @@
           <i class="iconfont icon-weixin"></i>
           <p class="wx">微信</p>
         </div>
-        <div class="select-item" style="padding-right:0.24rem;">
+        <div class="select-item" style="padding-right:0.24rem;" @click="_goCart">
           <span class="goods-num" v-show="goodsNum">({{goodsNum}})</span>
           <i class="iconfont icon-cart-empty" :class="{have: goodsNum}"></i>
           <p class="cart" :class="{have: goodsNum}">购物车</p>  
@@ -31,7 +31,7 @@
         </div>
       </div>
       <div class="properties" v-if="properties">
-         <div v-for="item in properties" :key="item.id">
+         <div v-for="(item,itemIndex) in properties" :key="item.id">
             <p class="properties-name">{{item.name}}</p>
             <ul class="properties-list">
               <li class="properties-item" v-for="(i,index) in item.childsCurGoods" 
@@ -44,49 +44,77 @@
          </div>
       </div>
       <div class="buy">
-        <div class="title">
-          购买数量
-        </div>
+        <div class="title">购买数量</div>
         <div class="handle">
-           <inline-x-number width="50px" :min=1 v-model="num"></inline-x-number>
+           <inline-x-number width="50px" :min=1 v-model="cartInfo.number"></inline-x-number>
         </div>
       </div>
-      <div class="handle" :style="{background:handelColor}">{{handelStr}}</div>
+      <div class="handle" :style="{background:handelColor}" @click="_submit">{{handelStr}}</div>
     </div>
-    <div class="zz"  v-if="!isHide"></div>
-   
+    <div class="zz"  v-if="!isHide"  @click="isHide = true"></div>
   </div>
 </template>
 
 <script>
-import {XButton,InlineXNumber  } from 'vux';
+import {XButton,InlineXNumber} from 'vux';
+import {getSessionStorage,setSessionStorage} from '@/utils/index.js'
 export default {
-  props:['goodsNum','goodsInfo','properties'],
+  props:['goodsInfo','properties'],
   data () {
     return {
       isHide: true,
       num:1,
       handelStr:'加入购物车',
       handelColor:'#E64340',
-      currentIndex:''
+      currentIndex:'',
+      type:0,
+      cartInfo:{
+        goodsId:this.goodsInfo.id,
+        pic:this.goodsInfo.pic,
+        name:this.goodsInfo.name,
+        propertyChildIds:'',
+        label:'',
+        price:this.goodsInfo.minPrice,
+        score:this.goodsInfo.minScore,
+        left:'',
+        active:'',
+        number:1
+      },
+      classList:[],
+      goodsNum: getSessionStorage('shopCarInfo').shopNum
     }
   },
   components:{
     XButton,
     InlineXNumber
   },
+  created(){
+    this.__init();
+  },
   methods:{
+    __init(){
+      this.properties.forEach(item=>{
+        this.classList.push({
+          name:item.name,
+          id: item.id,
+          childsCurGoodsId:'',
+          value:''
+        })
+      })
+    },
     // 加入购物车
     _addCart(){
       this.isHide = false
       this.handelStr = "加入购物车"
       this.handelColor = "#E64340"
+      this.type = 0;
     },
     // 立刻购买
     _buyNow(){
       this.isHide = false
       this.handelStr = "立刻购买"
       this.handelColor = "#1AAD19"
+      this.type = 1;
     },
     _selectClass(list,item,index) {
       list.forEach((element,i) => {
@@ -96,7 +124,64 @@ export default {
           element.remark =  false;
         }
       });
-      console.log()
+      this.classList.forEach(Item=>{
+        if (Item.id === item.propertyId) {
+          Item.childsCurGoodsId = item.id
+          Item.value = item.name 
+        }
+      })
+    },
+    __reset(){
+      this.cartInfo.number = 1;
+    },
+    _goCart(){
+      this.$router.push({
+          path: `/index/cart`,
+      })
+
+    },
+    _submit(){
+       // 属性选择完全验证
+       let propertyChildIds = ''
+       let label = ''
+       let flag = false;
+       this.classList.forEach(item=>{
+         if (!item.value) {
+          this.$vux.toast.text('请选择完整的参数', 'middle')
+          flag = true;
+          return false;
+         }else{
+           propertyChildIds += item.id+':'+item.childsCurGoodsId+','
+           label += item.name+':'+item.value+' '
+         }
+       })
+       if (flag) {
+         return false;
+       }
+       this.cartInfo.propertyChildIds = propertyChildIds
+       this.cartInfo.label = label
+       // 缓存处理
+       if (!this.type) {
+        let shopCarInfo = getSessionStorage('shopCarInfo');
+        let isCommon = false;
+        shopCarInfo.shopList.forEach(item=>{
+            if (item.propertyChildIds == this.cartInfo.propertyChildIds && item.goodsId == this.cartInfo.goodsId) {
+              item.number +=  this.cartInfo.number
+              isCommon = true
+            }
+        })
+        if (!isCommon) {
+          shopCarInfo.shopList.push(this.cartInfo)
+        }
+        shopCarInfo.shopNum += this.cartInfo.number
+        this.goodsNum = shopCarInfo.shopNum;
+        setSessionStorage('shopCarInfo',shopCarInfo);
+        this.__reset()
+        this.isHide = true;
+       }else{
+         // 跳转到订单页面
+       }
+
     }
   }
 }
