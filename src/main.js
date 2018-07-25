@@ -5,7 +5,8 @@ import FastClick from 'fastclick'
 import App from './App'
 import router from '@/router'
 import '@/styles/index.css'
-
+import  { ToastPlugin } from 'vux'
+Vue.use(ToastPlugin)
 FastClick.attach(document.body)
 
 Vue.config.productionTip = false

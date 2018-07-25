@@ -47,7 +47,7 @@
       </div>
     </div>
     <div class="detail-footer">
-      <GoodSelect  :goodsInfo="goodDetailInfo.basicInfo" :properties="goodDetailInfo.properties"/>
+      <GoodSelect  :goodsInfo="goodDetailInfo.basicInfo" :properties="goodDetailInfo.properties ? goodDetailInfo.properties: []"/>
     </div>
   </div>
 </template>
@@ -55,9 +55,8 @@
 <script>
 import GoodSelect from '@/components/GoodSelect.vue'
 import {getGoodsDetail,getGoodsVideo,getReputationList} from '@/service/detail'
-
 import {Swiper ,SwiperItem,XHeader} from 'vux';
-
+import {getSessionStorage,setSessionStorage} from '@/utils/index.js'
 export default {
   name: 'detail',
   data () {
@@ -75,9 +74,14 @@ export default {
    GoodSelect
   },
   created(){
-    // 获取商品详情信息
     this._getGoodsDetail();
     this._getReputationList();
+    if ( !getSessionStorage('shopCarInfo')) {
+      setSessionStorage('shopCarInfo',{
+        shopList:[],
+        shopNum:0
+      })
+    }
   },
   computed:{
     isVideo(){

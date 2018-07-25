@@ -2,6 +2,9 @@
   <div id="home">
     <!-- 图片轮播 -->
     <x-header :left-options="{showBack: false}">天使童装</x-header>
+    <div class="search">
+      <search @on-submit="_onSubmit" v-model="nameLike"></search>    
+    </div>
     <div class="banner-warp"> 
       <swiper height="5.4rem" dots-position="center" auto >
         <swiper-item  v-for="item in bannerList" :key="item.id">
@@ -36,7 +39,7 @@
 
 <script>
 import { getBanberList, getGoodList,getClassList } from '@/service/home.js'
-import { Tab, TabItem ,Swiper ,SwiperItem,Flexbox, FlexboxItem, XHeader  } from 'vux'
+import { Tab, TabItem ,Swiper ,SwiperItem,Flexbox, FlexboxItem, XHeader ,Search } from 'vux'
 export default {
   name: 'home',
   data () {
@@ -55,7 +58,8 @@ export default {
     SwiperItem,
     Flexbox, 
     FlexboxItem,
-    XHeader
+    XHeader,
+    Search
   },
   created(){
     
@@ -79,6 +83,7 @@ export default {
       this.classList = await getClassList();
     },
     _filterGoodList(categoryId){
+      this.nameLike = ""
       this.categoryId = categoryId;
       this._getGoodList();
     },
@@ -87,6 +92,10 @@ export default {
       this.$router.push({
           path: `/detail?id=${id}`,
       })
+    },
+    // 搜索
+    _onSubmit(){
+      this._getGoodList()
     }
   }
 }

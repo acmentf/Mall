@@ -143,6 +143,8 @@ textarea {
 
 button {
   overflow: visible;
+  border:none;
+  
 }
 
 button,
