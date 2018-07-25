@@ -60,15 +60,17 @@
 
 <script>
 import {XButton,InlineXNumber  } from 'vux';
+import {getSessionStorage,setSessionStorage} from '@/utils/index.js'
 export default {
-  props:['goodsNum','goodsInfo','properties'],
+  props:['goodsInfo','properties'],
   data () {
     return {
       isHide: true,
       num:1,
       handelStr:'加入购物车',
       handelColor:'#E64340',
-      currentIndex:''
+      currentIndex:'',
+      goodsNum: getSessionStorage('shopCarInfo') ? parseInt(getSessionStorage('shopCarInfo').shopNum) : 0
     }
   },
   components:{
@@ -96,7 +98,8 @@ export default {
           element.remark =  false;
         }
       });
-      console.log()
+      console.log(this.goodsInfo)
+      
     }
   }
 }

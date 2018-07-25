@@ -47,7 +47,7 @@
       </div>
     </div>
     <div class="detail-footer">
-      <GoodSelect goodsNum="3" :goodsInfo="goodDetailInfo.basicInfo" :properties="goodDetailInfo.properties"/>
+      <GoodSelect  :goodsInfo="goodDetailInfo.basicInfo" :properties="goodDetailInfo.properties"/>
     </div>
   </div>
 </template>
@@ -55,6 +55,7 @@
 <script>
 import GoodSelect from '@/components/GoodSelect.vue'
 import {getGoodsDetail,getGoodsVideo,getReputationList} from '@/service/detail'
+
 import {Swiper ,SwiperItem,XHeader} from 'vux';
 
 export default {
